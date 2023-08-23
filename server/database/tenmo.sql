@@ -1,14 +1,20 @@
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS tenmo_user, account;
+DROP TABLE IF EXISTS transfer, tenmo_user, account;
 
-DROP SEQUENCE IF EXISTS seq_user_id, seq_account_id;
+DROP SEQUENCE IF EXISTS seq_transfer_id, seq_user_id, seq_account_id;
 
 -- Sequence to start user_id values at 1001 instead of 1
 CREATE SEQUENCE seq_user_id
   INCREMENT BY 1
   START WITH 1001
   NO MAXVALUE;
+
+-- Sequence to start transfer_id values at 1001 instead of 1
+CREATE SEQUENCE seq_transfer_id
+INCREMENT BY 1
+START WITH 3001
+NO MAXVALUE;
 
 CREATE TABLE tenmo_user (
 	user_id int NOT NULL DEFAULT nextval('seq_user_id'),
