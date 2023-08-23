@@ -36,8 +36,8 @@ public class JdbcAccountDao implements AccountDao {
     @Override
     public Account createAccount(Account account) {
         Account newAccount;
-        String sql = "INSERT INTO account (user_id) " +
-                "VALUES (?) " +
+        String sql = "INSERT INTO account (user_id, balance) " +
+                "VALUES (?, 1000) " +
                 "RETURNING account_id;";
         try {
             Integer accountId = jdbcTemplate.queryForObject(sql, Integer.class, account.getUserId());
@@ -57,7 +57,10 @@ public class JdbcAccountDao implements AccountDao {
                 "SET balance = ? " +
                 "WHERE account_id = ?;";
         try {
-            jdbcTemplate.update(sql, account.getBalance(), account.getUserId());
+            int updatedRows = jdbcTemplate.update(sql, account.getBalance(), account.getUserId());
+            if (updatedRows == 0) {
+                throw new DaoException("Zero rows updated, expected one");
+            }
             updatedAccount = getAccountById(account.getAccountId());
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database", e);
