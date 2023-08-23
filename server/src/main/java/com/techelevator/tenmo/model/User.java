@@ -9,7 +9,7 @@ public class User {
    private int id;
    private String username;
    private String password;
-   private boolean activated;
+private boolean activated;
    private Set<Authority> authorities = new HashSet<>();
 
    public User() { }
