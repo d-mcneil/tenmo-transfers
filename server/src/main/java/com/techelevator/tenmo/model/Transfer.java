@@ -5,8 +5,8 @@ import java.sql.Timestamp;
 
 public class Transfer {
     private int transferId;
-    private int senderId;
-    private int receiverId;
+    private int senderAccountId;
+    private int receiverAccountId;
     private BigDecimal transferAmount;
     private String status;
     private Timestamp transferTimestamp;
@@ -35,20 +35,20 @@ public class Transfer {
         this.status = status;
     }
 
-    public int getSenderId() {
-        return senderId;
+    public int getSenderAccountId() {
+        return senderAccountId;
     }
 
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
+    public void setSenderAccountId(int senderAccountId) {
+        this.senderAccountId = senderAccountId;
     }
 
-    public int getReceiverId() {
-        return receiverId;
+    public int getReceiverAccountId() {
+        return receiverAccountId;
     }
 
-    public void setReceiverId(int receiverId) {
-        this.receiverId = receiverId;
+    public void setReceiverAccountId(int receiverAccountId) {
+        this.receiverAccountId = receiverAccountId;
     }
 
     public BigDecimal getTransferAmount() {

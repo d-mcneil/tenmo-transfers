@@ -13,7 +13,6 @@ import java.math.RoundingMode;
 
 public class JdbcAccountDaoTests extends BaseDaoTests {
 
-//    Account updateAccount(Account account);
 
     private JdbcAccountDao sut;
 
@@ -50,27 +49,37 @@ public class JdbcAccountDaoTests extends BaseDaoTests {
     }
 
     @Test
-    public void getAccountById_returns_null_when_account_id_not_found(){
+    public void getAccountById_returns_null_when_account_id_not_found() {
         Account nullAccount = sut.getAccountById(0);
         Assert.assertNull(nullAccount);
     }
 
     @Test
-    public void created_account_has_expected_values_when_retrieved(){
+    public void created_account_has_expected_values_when_retrieved() {
         Account testAccount = new Account();
         testAccount.setUserId(1001);
         testAccount.setBalance(BigDecimal.valueOf(1000).setScale(2, RoundingMode.HALF_UP));
 
         Account createdAccount = sut.createAccount(testAccount);
         int newId = createdAccount.getAccountId();
-        Assert.assertTrue(newId > 1000);
+        Assert.assertTrue(newId > 2000);
 
         Account retrievedAccount = sut.getAccountById(newId);
         assertAccountsMatch(createdAccount, retrievedAccount);
     }
 
+    @Test
+    public void updated_account_has_expected_values_when_retrieved() {
+        Account accountToUpdate = sut.getAccountById(2001);
+        accountToUpdate.setBalance(BigDecimal.valueOf(7777.77).setScale(2, RoundingMode.HALF_UP));
+        sut.updateAccount(accountToUpdate);
+        Account retrievedAccount = sut.getAccountById(2001);
 
-    private void assertAccountsMatch(Account expected, Account actual){
+        assertAccountsMatch(accountToUpdate, retrievedAccount);
+    }
+
+
+    private void assertAccountsMatch(Account expected, Account actual) {
         Assert.assertEquals(expected.getAccountId(), actual.getAccountId());
         Assert.assertEquals(expected.getUserId(), actual.getUserId());
         Assert.assertEquals(expected.getBalance(), actual.getBalance());

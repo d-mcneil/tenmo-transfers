@@ -62,7 +62,7 @@ public class JdbcTransferDao implements TransferDao {
                 "receiving_account_id, amount, status) VALUES (?, ?, ?, ?)" +
                 " RETURNING transfer_id;";
         try {
-            Integer transferId = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getSenderId(), transfer.getReceiverId(), transfer.getTransferAmount(), transfer.getStatus());
+            Integer transferId = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getSenderAccountId(), transfer.getReceiverAccountId(), transfer.getTransferAmount(), transfer.getStatus());
             newTransfer = getTransferById(transferId);
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database", e);
@@ -75,8 +75,8 @@ public class JdbcTransferDao implements TransferDao {
     private Transfer mapRowToTransfer(SqlRowSet rowSet) {
         Transfer transfer = new Transfer();
         transfer.setTransferId(rowSet.getInt("transfer_id"));
-        transfer.setSenderId(rowSet.getInt("sending_account_id"));
-        transfer.setReceiverId(rowSet.getInt("receiving_account_id"));
+        transfer.setSenderAccountId(rowSet.getInt("sending_account_id"));
+        transfer.setReceiverAccountId(rowSet.getInt("receiving_account_id"));
         transfer.setTransferAmount(rowSet.getBigDecimal("amount"));
         transfer.setTransferTimestamp(rowSet.getTimestamp("transfer_timestamp"));
         transfer.setStatus(rowSet.getString("status"));
