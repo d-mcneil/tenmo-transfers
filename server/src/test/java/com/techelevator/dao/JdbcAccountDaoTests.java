@@ -54,6 +54,11 @@ public class JdbcAccountDaoTests extends BaseDaoTests {
         Assert.assertNull(nullAccount);
     }
 
+    // TODO make tests for this method
+//    Account getAccountByUserId(int userId)
+
+
+
     @Test
     public void created_account_has_expected_values_when_retrieved() {
         Account testAccount = new Account();
