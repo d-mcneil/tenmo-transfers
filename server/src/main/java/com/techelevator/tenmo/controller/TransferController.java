@@ -43,7 +43,6 @@ public class TransferController {
         return transfer;
     }
 
-    //TODO FINISH METHOD, FIGURE OUT HOW TO GET RECEIVER USERNAME
     @RequestMapping(path = "/users/{userId}/history", method = RequestMethod.GET)
     public List<TransferResponse> getUserTransferHistory(@PathVariable int userId, Principal principal) {
         Account account = accountDao.getAccountByUserId(userId);
@@ -54,7 +53,19 @@ public class TransferController {
         List<Transfer> transfers = transferDao.getTransfersByAccountId(accountId);
         List<TransferResponse> transferResponses = new ArrayList<>();
         for (Transfer transfer : transfers) {
-//            transferResponses.add(transfer.getTransferId(), transfer.getTransferAmount(), principal.getName(), transfer.get)
+            TransferResponse transferResponse = new TransferResponse();
+
+            transferResponse.setTransferAmount(transfer.getTransferAmount());
+            transferResponse.setTransferId(transfer.getTransferId());
+            transferResponse.setFrom(principal.getName());
+
+            String receiverUsername = userDao.findUsernameByAccountId(transfer.getReceiverAccountId());
+            if (receiverUsername == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+            }
+
+            transferResponse.setTo(receiverUsername);
+            transferResponses.add(transferResponse);
         }
         return transferResponses;
     }
@@ -79,7 +90,7 @@ public class TransferController {
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
     public TransferResponse addTransfer(@Valid @RequestBody TransferDTO transferDTO, Principal principal) {
-        // TODO is not found an appropriate response for a post request?
+        // TODO is not found an appropriate response for a post request? ASK JEREMY if should be bad request instead
 
         int receiverUserId = userDao.findIdByUsername(transferDTO.getUsername());
         if (receiverUserId == -1) {
@@ -126,15 +137,14 @@ public class TransferController {
         BigDecimal receiverAccountBalance = receiverAccount.getBalance();
         receiverAccount.setBalance(receiverAccountBalance.add(transferAmount));
 
-        // TODO exception handling
+        // TODO exception handling - ASK JEREMY how a transaction would be applied here
         accountDao.updateAccount(senderAccount);
         accountDao.updateAccount(receiverAccount);
-        // TODO ask jeremy how a transaction would be applied here
 
         return new TransferResponse(createdTransfer.getTransferId(), transferAmount, principal.getName(), transferDTO.getUsername());
     }
 
-    // TODO: ask jeremy if there is a better way to handle this problem (returning too much info)
+    // TODO: ASK JEREMY if there is a better way to handle this problem (returning too much info)
     static class TransferUsersResponse {
         String username;
 
@@ -160,6 +170,9 @@ public class TransferController {
             this.to = to;
         }
 
+        public TransferResponse() {
+        }
+
         public String getFrom() {
             return from;
         }
@@ -174,6 +187,22 @@ public class TransferController {
 
         public BigDecimal getTransferAmount() {
             return transferAmount;
+        }
+
+        public void setTransferId(int transferId) {
+            this.transferId = transferId;
+        }
+
+        public void setTransferAmount(BigDecimal transferAmount) {
+            this.transferAmount = transferAmount;
+        }
+
+        public void setFrom(String from) {
+            this.from = from;
+        }
+
+        public void setTo(String to) {
+            this.to = to;
         }
     }
 

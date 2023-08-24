@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class JdbcUserDao implements UserDao {
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
 
     public JdbcUserDao(JdbcTemplate jdbcTemplate) {
@@ -32,6 +32,15 @@ public class JdbcUserDao implements UserDao {
         } else {
             return -1;
         }
+    }
+
+    @Override
+    public String findUsernameByAccountId(int accountId) {
+        String sql = "SELECT username " +
+                "FROM tenmo_user " +
+                "JOIN account ON account.user_id = tenmo_user.user_id " +
+                "WHERE account_id = ?;";
+        return jdbcTemplate.queryForObject(sql, String.class, accountId);
     }
 
     @Override
