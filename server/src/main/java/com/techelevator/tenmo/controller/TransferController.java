@@ -43,7 +43,24 @@ public class TransferController {
         return transfer;
     }
 
-    @RequestMapping(path = "/users/{userId}", method = RequestMethod.GET)
+    //TODO FINISH METHOD, FIGURE OUT HOW TO GET RECEIVER USERNAME
+    @RequestMapping(path = "/users/{userId}/history", method = RequestMethod.GET)
+    public List<TransferResponse> getUserTransferHistory(@PathVariable int userId, Principal principal) {
+        Account account = accountDao.getAccountByUserId(userId);
+        if (account == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        }
+        int accountId = account.getAccountId();
+        List<Transfer> transfers = transferDao.getTransfersByAccountId(accountId);
+        List<TransferResponse> transferResponses = new ArrayList<>();
+        for (Transfer transfer : transfers) {
+//            transferResponses.add(transfer.getTransferId(), transfer.getTransferAmount(), principal.getName(), transfer.get)
+        }
+        return transferResponses;
+    }
+
+
+    @RequestMapping(path = "/users/{userId}/available-users", method = RequestMethod.GET)
     public List<TransferUsersResponse> getUsersThatCanBeTransferredTo(Principal principal) {
         List<TransferUsersResponse> usersToTransferTo = new ArrayList<>();
 
@@ -57,6 +74,7 @@ public class TransferController {
 
         return usersToTransferTo;
     }
+
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
@@ -113,7 +131,7 @@ public class TransferController {
         accountDao.updateAccount(receiverAccount);
         // TODO ask jeremy how a transaction would be applied here
 
-        return new TransferResponse(principal.getName(),transferDTO.getUsername(), createdTransfer.getTransferId(), transferAmount);
+        return new TransferResponse(createdTransfer.getTransferId(), transferAmount, principal.getName(), transferDTO.getUsername());
     }
 
     // TODO: ask jeremy if there is a better way to handle this problem (returning too much info)
@@ -130,16 +148,16 @@ public class TransferController {
     }
 
     static class TransferResponse {
-        String from;
-        String to;
         int transferId;
         BigDecimal transferAmount;
+        String from;
+        String to;
 
-        public TransferResponse(String from, String to, int transferId, BigDecimal transferAmount) {
-            this.from = from;
-            this.to = to;
+        public TransferResponse(int transferId, BigDecimal transferAmount, String from, String to) {
             this.transferId = transferId;
             this.transferAmount = transferAmount;
+            this.from = from;
+            this.to = to;
         }
 
         public String getFrom() {
