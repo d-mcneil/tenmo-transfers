@@ -17,10 +17,11 @@ import java.util.List;
 public class JdbcUserDao implements UserDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final AccountDao accountDao;
 
-
-    public JdbcUserDao(JdbcTemplate jdbcTemplate) {
+    public JdbcUserDao(JdbcTemplate jdbcTemplate, AccountDao accountDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.accountDao = accountDao;
     }
 
     @Override
@@ -78,8 +79,7 @@ public class JdbcUserDao implements UserDao {
             return false;
         }
 
-        // TODO: Is there a way to inject Jdbcaccountdao?
-        new JdbcAccountDao(jdbcTemplate).createAccount(new Account(newUserId));
+        accountDao.createAccount(new Account(newUserId));
         return true;
     }
 
