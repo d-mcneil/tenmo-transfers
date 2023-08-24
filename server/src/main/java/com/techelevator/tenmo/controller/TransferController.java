@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
-@RequestMapping(path = "api/transfers/")
+@RequestMapping(path = "api/transfers")
 public class TransferController {
 
     private final UserDao userDao;
@@ -34,7 +34,7 @@ public class TransferController {
         this.accountDao = accountDao;
     }
 
-    @RequestMapping(path = "{transferId}", method = RequestMethod.GET)
+    @RequestMapping(path = "/{transferId}", method = RequestMethod.GET)
     public Transfer get(@PathVariable int transferId) {
         Transfer transfer = transferDao.getTransferById(transferId);
         if (transfer == null) {
@@ -43,7 +43,7 @@ public class TransferController {
         return transfer;
     }
 
-    @RequestMapping(path = "users/{userId}", method = RequestMethod.GET)
+    @RequestMapping(path = "/users/{userId}", method = RequestMethod.GET)
     public List<TransferUsersResponse> getUsersThatCanBeTransferredTo(Principal principal) {
         List<TransferUsersResponse> usersToTransferTo = new ArrayList<>();
 
@@ -58,39 +58,62 @@ public class TransferController {
         return usersToTransferTo;
     }
 
-    // TODO add transfer method
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
-    public Transfer addTransfer(@Valid @RequestBody TransferDTO transferDTO, Principal principal) {
-        int receiverAccountId = userDao.findIdByUsername(transferDTO.getUsername());
-        int senderAccountId = userDao.findIdByUsername(principal.getName());
-        if (senderAccountId == receiverAccountId) {
+    public TransferResponse addTransfer(@Valid @RequestBody TransferDTO transferDTO, Principal principal) {
+        // TODO is not found an appropriate response for a post request?
+
+        int receiverUserId = userDao.findIdByUsername(transferDTO.getUsername());
+        if (receiverUserId == -1) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Receiver account not found");
+        }
+
+        int senderUserId = userDao.findIdByUsername(principal.getName());
+        if (senderUserId == -1) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sender account not found");
+        }
+
+        if (senderUserId == receiverUserId) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An account cannot transfer to itself");
         }
-        Account senderAccount = accountDao.getAccountByUserId(senderAccountId);
+
+        Account senderAccount = accountDao.getAccountByUserId(senderUserId);
         if (senderAccount == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sender account not found");
         }
-        Account receiverAccount = accountDao.getAccountByUserId(receiverAccountId);
+
+        Account receiverAccount = accountDao.getAccountByUserId(receiverUserId);
         if (receiverAccount == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Receiver account not found");
         }
+
         BigDecimal senderAccountBalance = senderAccount.getBalance();
         BigDecimal transferAmount = transferDTO.getTransferAmount();
-
         if (senderAccountBalance.compareTo(transferAmount) < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sender account, insufficient balance");
         }
         if (transferAmount.compareTo(BigDecimal.ZERO) < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer amount must be a positive amount");
         }
-        // TODO create transfer to return
-     //   transfer.setStatus("Approved");
-        //    transfer.getSenderAccountId()
 
+        Transfer transferToCreate = new Transfer();
+        transferToCreate.setTransferAmount(transferAmount);
+        transferToCreate.setStatus("Approved");
+        transferToCreate.setSenderAccountId(senderAccount.getAccountId());
+        transferToCreate.setReceiverAccountId(receiverAccount.getAccountId());
+        Transfer createdTransfer = transferDao.createTransfer(transferToCreate);
 
-        //transferDao.createTransfer(transfer);
-        return null;
+        senderAccount.setBalance(senderAccountBalance.subtract(transferAmount));
+
+        BigDecimal receiverAccountBalance = receiverAccount.getBalance();
+        receiverAccount.setBalance(receiverAccountBalance.add(transferAmount));
+
+        // TODO exception handling
+        accountDao.updateAccount(senderAccount);
+        accountDao.updateAccount(receiverAccount);
+        // TODO ask jeremy how a transaction would be applied here
+
+        return new TransferResponse(principal.getName(),transferDTO.getUsername(), createdTransfer.getTransferId(), transferAmount);
     }
 
     // TODO: ask jeremy if there is a better way to handle this problem (returning too much info)
@@ -103,6 +126,36 @@ public class TransferController {
 
         public String getUsername() {
             return username;
+        }
+    }
+
+    static class TransferResponse {
+        String from;
+        String to;
+        int transferId;
+        BigDecimal transferAmount;
+
+        public TransferResponse(String from, String to, int transferId, BigDecimal transferAmount) {
+            this.from = from;
+            this.to = to;
+            this.transferId = transferId;
+            this.transferAmount = transferAmount;
+        }
+
+        public String getFrom() {
+            return from;
+        }
+
+        public String getTo() {
+            return to;
+        }
+
+        public int getTransferId() {
+            return transferId;
+        }
+
+        public BigDecimal getTransferAmount() {
+            return transferAmount;
         }
     }
 
