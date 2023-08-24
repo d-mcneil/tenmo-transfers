@@ -31,20 +31,10 @@ public class AuthenticationController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserDao userDao;
-    private final AccountDao accountDao;
-
-    // TODO - previous constructor for before we added accountDao
-//    public AuthenticationController(TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder, UserDao userDao) {
-//        this.tokenProvider = tokenProvider;
-//        this.authenticationManagerBuilder = authenticationManagerBuilder;
-//        this.userDao = userDao;
-//    }
-
-    public AuthenticationController(TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder, UserDao userDao, AccountDao accountDao) {
+    public AuthenticationController(TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder, UserDao userDao) {
         this.tokenProvider = tokenProvider;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDao = userDao;
-        this.accountDao = accountDao;
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -69,10 +59,7 @@ public class AuthenticationController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User registration failed.");
         }
 
-        // TODO - tightly coupled code, so can we move this to account controller somehow?
-        Account account = new Account();
-        account.setUserId(userDao.findIdByUsername(newUser.getUsername()));
-        accountDao.createAccount(account);
+
     }
 
 

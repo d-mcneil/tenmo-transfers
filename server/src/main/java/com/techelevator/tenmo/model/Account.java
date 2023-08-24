@@ -7,6 +7,14 @@ public class Account {
     private int userId;
     private int accountId;
 
+    public Account(int userId) {
+        this.userId = userId;
+    }
+
+    public Account() {
+
+    }
+
     public BigDecimal getBalance() {
         return balance;
     }

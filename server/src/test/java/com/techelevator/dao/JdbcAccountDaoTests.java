@@ -54,9 +54,20 @@ public class JdbcAccountDaoTests extends BaseDaoTests {
         Assert.assertNull(nullAccount);
     }
 
-    // TODO make tests for this method
-//    Account getAccountByUserId(int userId)
+    @Test
+    public void getAccountByUserId_returns_correct_account_information() {
+        Account account1 = sut.getAccountByUserId(1001);
+        assertAccountsMatch(ACCOUNT_1, account1);
 
+        Account account2 = sut.getAccountByUserId(1002);
+        assertAccountsMatch(ACCOUNT_2, account2);
+    }
+
+    @Test
+    public void getAccountByUserId_returns_null_when_account_id_not_found() {
+        Account nullAccount = sut.getAccountByUserId(0);
+        Assert.assertNull(nullAccount);
+    }
 
 
     @Test
