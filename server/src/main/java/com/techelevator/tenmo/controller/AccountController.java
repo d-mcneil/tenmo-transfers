@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.dao.AccountDao;
+import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
 import exception.DaoException;
 import org.springframework.http.HttpStatus;
@@ -16,16 +17,24 @@ import java.security.Principal;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
-@RequestMapping(path = "/api/")
+@RequestMapping(path = "/api/account")
 public class AccountController {
     private final AccountDao accountDao;
+    private final UserDao userDao;
 
-    public AccountController(AccountDao accountDao) {
+    public AccountController(AccountDao accountDao, UserDao userDao) {
         this.accountDao = accountDao;
+        this.userDao = userDao;
     }
 
-    @RequestMapping(path = "{userId}/accounts", method = RequestMethod.GET)
-    public AccountResponse get(@PathVariable int userId, Principal principal) {
+    @RequestMapping(method = RequestMethod.GET)
+    public AccountResponse get(Principal principal) {
+        int userId = userDao.findIdByUsername(principal.getName());
+
+        if (userId == -1) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
         Account account = accountDao.getAccountByUserId(userId);
         if (account == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User account not found");

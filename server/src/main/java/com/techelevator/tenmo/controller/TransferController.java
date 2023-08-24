@@ -43,8 +43,14 @@ public class TransferController {
         return transfer;
     }
 
-    @RequestMapping(path = "/users/{userId}/history", method = RequestMethod.GET)
-    public List<TransferResponse> getUserTransferHistory(@PathVariable int userId, Principal principal) {
+    @RequestMapping(method = RequestMethod.GET)
+    public List<TransferResponse> getUserTransferHistory(Principal principal) {
+        int userId = userDao.findIdByUsername(principal.getName());
+
+        if (userId == -1) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        }
+
         Account account = accountDao.getAccountByUserId(userId);
         if (account == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
@@ -53,25 +59,29 @@ public class TransferController {
         List<Transfer> transfers = transferDao.getTransfersByAccountId(accountId);
         List<TransferResponse> transferResponses = new ArrayList<>();
         for (Transfer transfer : transfers) {
-            TransferResponse transferResponse = new TransferResponse();
-
-            transferResponse.setTransferAmount(transfer.getTransferAmount());
-            transferResponse.setTransferId(transfer.getTransferId());
-            transferResponse.setFrom(principal.getName());
+            String senderUsername = userDao.findUsernameByAccountId(transfer.getSenderAccountId());
+            if (senderUsername == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+            }
 
             String receiverUsername = userDao.findUsernameByAccountId(transfer.getReceiverAccountId());
             if (receiverUsername == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
             }
 
+            TransferResponse transferResponse = new TransferResponse();
+
+            transferResponse.setFrom(senderUsername);
             transferResponse.setTo(receiverUsername);
+            transferResponse.setTransferAmount(transfer.getTransferAmount());
+            transferResponse.setTransferId(transfer.getTransferId());
+
             transferResponses.add(transferResponse);
         }
         return transferResponses;
     }
 
-
-    @RequestMapping(path = "/users/{userId}/available-users", method = RequestMethod.GET)
+    @RequestMapping(path = "/users", method = RequestMethod.GET)
     public List<TransferUsersResponse> getUsersThatCanBeTransferredTo(Principal principal) {
         List<TransferUsersResponse> usersToTransferTo = new ArrayList<>();
 
@@ -85,7 +95,6 @@ public class TransferController {
 
         return usersToTransferTo;
     }
-
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
@@ -205,6 +214,4 @@ public class TransferController {
             this.to = to;
         }
     }
-
-
 }
