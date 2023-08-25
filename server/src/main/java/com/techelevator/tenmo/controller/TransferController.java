@@ -35,12 +35,29 @@ public class TransferController {
     }
 
     @RequestMapping(path = "/{transferId}", method = RequestMethod.GET)
-    public Transfer get(@PathVariable int transferId) {
+    public TransferResponse get(@PathVariable int transferId) {
         Transfer transfer = transferDao.getTransferById(transferId);
         if (transfer == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found");
         }
-        return transfer;
+
+        String senderUsername = userDao.findUsernameByAccountId(transfer.getSenderAccountId());
+        if (senderUsername == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        }
+
+        String receiverUsername = userDao.findUsernameByAccountId(transfer.getReceiverAccountId());
+        if (receiverUsername == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        }
+
+        TransferResponse transferResponse = new TransferResponse();
+
+        transferResponse.setFrom(senderUsername);
+        transferResponse.setTo(receiverUsername);
+        transferResponse.setTransferAmount(transfer.getTransferAmount());
+        transferResponse.setTransferId(transfer.getTransferId());
+        return transferResponse;
     }
 
     @RequestMapping(method = RequestMethod.GET)
