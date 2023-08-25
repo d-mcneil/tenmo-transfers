@@ -40,24 +40,7 @@ public class TransferController {
         if (transfer == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found");
         }
-
-        String senderUsername = userDao.findUsernameByAccountId(transfer.getSenderAccountId());
-        if (senderUsername == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
-        }
-
-        String receiverUsername = userDao.findUsernameByAccountId(transfer.getReceiverAccountId());
-        if (receiverUsername == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
-        }
-
-        TransferResponse transferResponse = new TransferResponse();
-
-        transferResponse.setFrom(senderUsername);
-        transferResponse.setTo(receiverUsername);
-        transferResponse.setTransferAmount(transfer.getTransferAmount());
-        transferResponse.setTransferId(transfer.getTransferId());
-        return transferResponse;
+        return createTransferResponse(transfer);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -76,24 +59,9 @@ public class TransferController {
         List<Transfer> transfers = transferDao.getTransfersByAccountId(accountId);
         List<TransferResponse> transferResponses = new ArrayList<>();
         for (Transfer transfer : transfers) {
-            String senderUsername = userDao.findUsernameByAccountId(transfer.getSenderAccountId());
-            if (senderUsername == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
-            }
 
-            String receiverUsername = userDao.findUsernameByAccountId(transfer.getReceiverAccountId());
-            if (receiverUsername == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
-            }
 
-            TransferResponse transferResponse = new TransferResponse();
-
-            transferResponse.setFrom(senderUsername);
-            transferResponse.setTo(receiverUsername);
-            transferResponse.setTransferAmount(transfer.getTransferAmount());
-            transferResponse.setTransferId(transfer.getTransferId());
-
-            transferResponses.add(transferResponse);
+            transferResponses.add(createTransferResponse(transfer));
         }
         return transferResponses;
     }
@@ -170,7 +138,29 @@ public class TransferController {
         return new TransferResponse(createdTransfer.getTransferId(), transferAmount, principal.getName(), transferDTO.getUsername());
     }
 
+    private TransferResponse createTransferResponse(Transfer transfer) {
+        String senderUsername = userDao.findUsernameByAccountId(transfer.getSenderAccountId());
+        if (senderUsername == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        }
+
+        String receiverUsername = userDao.findUsernameByAccountId(transfer.getReceiverAccountId());
+        if (receiverUsername == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        }
+
+        TransferResponse transferResponse = new TransferResponse();
+
+        transferResponse.setFrom(senderUsername);
+        transferResponse.setTo(receiverUsername);
+        transferResponse.setTransferAmount(transfer.getTransferAmount());
+        transferResponse.setTransferId(transfer.getTransferId());
+        return transferResponse;
+    }
+
+
     // TODO: ASK JEREMY if there is a better way to handle this problem (returning too much info)
+
     static class TransferUsersResponse {
         String username;
 
