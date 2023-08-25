@@ -10,11 +10,17 @@ CREATE SEQUENCE seq_user_id
   START WITH 1001
   NO MAXVALUE;
 
--- Sequence to start transfer_id values at 3001 instead of 1
+-- Sequence to start account_id values at 2001 instead of 1
+-- Note: Use similar sequences with unique starting values for additional tables
+CREATE SEQUENCE seq_account_id
+  INCREMENT BY 1
+  START WITH 2001
+  NO MAXVALUE;
+
 CREATE SEQUENCE seq_transfer_id
-INCREMENT BY 1
-START WITH 3001
-NO MAXVALUE;
+  INCREMENT BY 1
+  START WITH 3001
+  NO MAXVALUE;
 
 CREATE TABLE tenmo_user (
 	user_id int NOT NULL DEFAULT nextval('seq_user_id'),
@@ -23,13 +29,6 @@ CREATE TABLE tenmo_user (
 	CONSTRAINT pk_tenmo_user PRIMARY KEY (user_id),
 	CONSTRAINT uq_username UNIQUE (username)
 );
-
--- Sequence to start account_id values at 2001 instead of 1
--- Note: Use similar sequences with unique starting values for additional tables
-CREATE SEQUENCE seq_account_id
-  INCREMENT BY 1
-  START WITH 2001
-  NO MAXVALUE;
 
 CREATE TABLE account (
 	account_id int NOT NULL DEFAULT nextval('seq_account_id'),
@@ -51,10 +50,6 @@ CREATE TABLE transfer (
 	CONSTRAINT fk_transfer_account_receiving FOREIGN KEY (receiving_account_id) REFERENCES account(account_id),
 	CONSTRAINT chk_sending_receiving_not_same_account CHECK (sending_account_id != receiving_account_id),
 	CONSTRAINT chk_amount_greater_than_zero CHECK (amount > 0)
-
-
-
 );
-
 
 COMMIT;
