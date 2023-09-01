@@ -1,9 +1,9 @@
 <h1 align="center">TEnmo Money Transfers</h1>
 
-- Employed pair programming methodology to collaboratively develop a Java Spring Boot application that models money transfers between users
-- Secured REST API endpoints using JSON Web Tokens (JWT) for authentication
-- Encapsulated interactions with PostgreSQL database utilizing the DAO design pattern
-- Performed integration testing and data validation to maintain data integrity
+- Employed pair programming methodology to collaboratively develop a **Java Spring Boot** application that models money transfers between users
+- Secured **REST API** endpoints using **JSON Web Tokens (JWT)** for authentication
+- Encapsulated interactions with **PostgreSQL** database utilizing the **DAO design pattern**
+- Performed **integration testing** and **data validation** to maintain data integrity
   
 ![TEnmo Money Transfers Banner](https://github.com/d-mcneil/tenmo-transfers/assets/108340538/4c87c706-9822-4a03-bb11-550a83bfaf65)
 
