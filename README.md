@@ -1,3 +1,12 @@
+<h1 align="center">TEnmo Money Transfers</h1>
+
+- Employed pair programming methodology to collaboratively develop a Java Spring Boot application that models money transfers between users
+- Secured REST API endpoints using JSON Web Tokens (JWT) for authentication
+- Encapsulated interactions with PostgreSQL database utilizing the DAO design pattern
+- Performed integration testing and data validation to maintain data integrity
+  
+![TEnmo Money Transfers Banner](https://github.com/d-mcneil/tenmo-transfers/assets/108340538/4c87c706-9822-4a03-bb11-550a83bfaf65)
+
 # Module 2 Capstone - TEnmo
 
 Congratulations—you've landed a job with TEnmo, whose product is an online payment service for transferring "TE bucks" between friends. However, they don't have a product yet. You've been tasked with finalizing the server side of the application: a database and a RESTful API server.
